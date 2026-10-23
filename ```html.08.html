@@ -1,0 +1,354 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro - Realtime Task Manager</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                        darkBg: '#0f172a',
+                        darkCard: '#1e293b',
+                        darkBorder: '#334155',
+                        darkInput: '#0f172a'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+
+        .task-enter {
+            animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-100 dark:bg-darkBg text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300 flex flex-col antialiased">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full opacity-0 transition-all duration-300 pointer-events-none">
+        <div id="toastInner" class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-sm font-medium border border-slate-700/30">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 dark:text-emerald-600"></i>
+            <span id="toastMsg">Action successful</span>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="editModal" class="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-darkBorder transform scale-95 transition-transform duration-200" id="editModalCard">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-600 dark:text-blue-400"></i> Edit Task
+                </h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-xl transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <form id="editForm" onsubmit="handleEditSubmit(event)" class="space-y-4">
+                <input type="hidden" id="editTaskId">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Task Title</label>
+                    <input type="text" id="editTitle" required class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Category</label>
+                        <select id="editCategory" class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Study">Study</option>
+                            <option value="Project">Project</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Work">Work</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Priority</label>
+                        <select id="editPriority" class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Due Date</label>
+                        <input type="date" id="editDueDate" class="w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-xl font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col">
+        
+        <!-- Navbar / Header -->
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-list-check text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                        TaskMaster <span class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs px-2.5 py-0.5 rounded-full font-bold uppercase">PRO</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Realtime Firebase Cloud Task Management</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Sync Indicator -->
+                <div id="syncStatus" class="hidden sm:flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button id="themeToggle" onclick="toggleTheme()" class="w-11 h-11 rounded-2xl bg-white dark:bg-darkCard hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-darkBorder flex items-center justify-center transition-all shadow-sm focus:outline-none" title="Toggle Light/Dark Theme">
+                    <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Progress Dashboard Card -->
+        <section class="bg-white dark:bg-darkCard rounded-3xl p-6 shadow-xl dark:shadow-2xl/40 border border-slate-200/80 dark:border-darkBorder mb-6 transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 dark:text-white">Progress Overview</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Keep track of your productivity goals</p>
+                </div>
+                <div class="flex items-center gap-4 text-xs font-bold">
+                    <div class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-darkBg text-slate-600 dark:text-slate-300">
+                        Total: <span id="dashTotal" class="text-blue-600 dark:text-blue-400 ml-1">0</span>
+                    </div>
+                    <div class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                        Completed: <span id="dashCompleted" class="ml-1">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between items-center text-xs font-bold">
+                    <span id="dashPercentText" class="text-blue-600 dark:text-blue-400">0% Completed</span>
+                    <span id="dashRemainingText" class="text-slate-400">0 remaining</span>
+                </div>
+                <div class="w-full h-3 bg-slate-100 dark:bg-darkBg rounded-full overflow-hidden p-0.5 border border-slate-200/50 dark:border-darkBorder">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Category Filters -->
+        <section class="grid grid-cols-1 sm:grid-cols-12 gap-3 mb-6">
+            <div class="sm:col-span-7 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="handleSearchFilter()" placeholder="Search tasks by title..." 
+                       class="w-full pl-11 pr-4 py-3 rounded-2xl bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+            </div>
+
+            <div class="sm:col-span-5 flex gap-2">
+                <select id="categoryFilter" onchange="handleSearchFilter()" class="w-full px-4 py-3 rounded-2xl bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm">
+                    <option value="All">All Categories</option>
+                    <option value="Study">🎓 Study</option>
+                    <option value="Project">🚀 Project</option>
+                    <option value="Personal">🏠 Personal</option>
+                    <option value="Work">💼 Work</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- New Task Creation Form -->
+        <section class="bg-white dark:bg-darkCard rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-200/80 dark:border-darkBorder mb-6">
+            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-plus text-blue-500"></i> Add New Task
+            </h3>
+            
+            <form onsubmit="handleAddTask(event)" class="space-y-3">
+                <div>
+                    <input type="text" id="newTaskTitle" required placeholder="What needs to be done?" 
+                           class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-darkBg border border-slate-200 dark:border-darkBorder text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <select id="newTaskCategory" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-darkBg border border-slate-200 dark:border-darkBorder text-slate-700 dark:text-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Study">🎓 Category: Study</option>
+                        <option value="Project">🚀 Category: Project</option>
+                        <option value="Personal">🏠 Category: Personal</option>
+                        <option value="Work">💼 Category: Work</option>
+                    </select>
+
+                    <select id="newTaskPriority" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-darkBg border border-slate-200 dark:border-darkBorder text-slate-700 dark:text-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Low">Priority: Low</option>
+                        <option value="Medium" selected>Priority: Medium</option>
+                        <option value="High">Priority: High</option>
+                    </select>
+
+                    <input type="date" id="newTaskDueDate" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-darkBg border border-slate-200 dark:border-darkBorder text-slate-700 dark:text-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex justify-end pt-1">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold rounded-2xl shadow-lg shadow-blue-500/25 transition-all text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Add Task</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Task List Container -->
+        <main class="flex-1 flex flex-col">
+            <ul id="taskList" class="space-y-3"></ul>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-12 px-4 bg-white/50 dark:bg-darkCard/50 rounded-3xl border border-dashed border-slate-300 dark:border-darkBorder">
+                <div class="w-16 h-16 bg-blue-50 dark:bg-darkBg rounded-full flex items-center justify-center mx-auto mb-3 text-2xl text-blue-500">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <p id="emptyTitle" class="text-base font-bold text-slate-700 dark:text-slate-300">No tasks found</p>
+                <p id="emptySubtitle" class="text-xs text-slate-400 mt-1">Add a new task above to get started.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK Modular Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration & Initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'todo-app-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-api-key",
+            authDomain: "demo-app.firebaseapp.com",
+            projectId: "demo-app",
+            storageBucket: "demo-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Application State
+        let currentTasks = [];
+        let currentUser = null;
+        let unsubscribeSnapshot = null;
+
+        // Make functions globally available for inline event listeners
+        window.toggleTheme = toggleTheme;
+        window.handleAddTask = handleAddTask;
+        window.handleSearchFilter = handleSearchFilter;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.handleEditSubmit = handleEditSubmit;
+        window.deleteTaskItem = deleteTaskItem;
+        window.toggleTaskCompletion = toggleTaskCompletion;
+
+        // 1. Initialize Auth on Application Start
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth initialization error:", err);
+                showToast("Auth failed, falling back to anonymous mode", "fa-triangle-exclamation");
+                await signInAnonymously(auth);
+            }
+        }
+
+        // Listen for Auth State Changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('syncStatus').classList.remove('hidden');
+                subscribeToFirestore();
+            } else {
+                currentUser = null;
+                if (unsubscribeSnapshot) unsubscribeSnapshot();
+            }
+        });
+
+        // 2. Realtime Firestore Subscription (Rule 1 & Rule 2 compliant)
+        function subscribeToFirestore() {
+            if (!currentUser) return;
+
+            // Public Collection Path according to strict rules
+            const tasksCollection = collection(db, 'artifacts', appId, 'public', 'data', 'tasks');
+
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+            unsubscribeSnapshot = onSnapshot(tasksCollection, (snapshot) => {
+                currentTasks = [];
+                snapshot.forEach((docSnap) => {
+                    currentTasks.push({
+                        id: docSnap.id,
+                        ...docSnap.data()
+                    });
+                });
+
+                // Client-side sorting by creation timestamp (descending)
+                currentTasks.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                renderApp();
+            }, (error) => {

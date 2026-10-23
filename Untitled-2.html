@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY TO DO LIST</title>
+    
+    <!-- CSS Styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaf2ff;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1a365d;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0052a3;
+        }
+
+        ul {
+            margin-top: 20px;
+            padding-left: 20px;
+        }
+
+        li {
+            padding: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>MY TO DO LIST</h1>
+
+    <!-- Task Input Box -->
+    <input type="text" id="taskInput" placeholder="Enter your task">
+    
+    <!-- Add Task Button -->
+    <button onclick="addTask()">Add Task</button>
+
+    <!-- Task List Container -->
+    <ul id="taskList"></ul>
+
+    <!-- JavaScript Code -->
+    <script>
+        // Function to add a new task to the list
+        function addTask() {
+            // Get the input element and its text value
+            let input = document.getElementById('taskInput');
+            let task = input.value;
+
+            // Check if the input is empty or contains only spaces
+            if (task.trim() === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            // Create a new <li> element and set its text content
+            let li = document.createElement('li');
+            li.textContent = task;
+
+            // Append the new <li> to the task list
+            document.getElementById('taskList').appendChild(li);
+
+            // Clear the input box after adding the task
+            input.value = "";
+        }
+    </script>
+
+</body>
+</html>
