@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY TO DO LIST</title>
+    
+    <style>
+        /* CSS Variables for Light/Dark Mode */
+        :root {
+            --bg-color: #eaf2ff;
+            --container-bg: #ffffff;
+            --text-color: #1a365d;
+            --input-border: #cbd5e1;
+            --card-bg: #f8fafc;
+            --card-text: #334155;
+            --subtext-color: #64748b;
+        }
+
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f8fafc;
+            --input-border: #475569;
+            --card-bg: #334155;
+            --card-text: #f1f5f9;
+            --subtext-color: #94a3b8;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 550px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .theme-btn {
+            background-color: transparent;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .theme-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Input Controls Layout */
+        .input-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], input[type="date"], select {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            outline: none;
+            background-color: var(--container-bg);
+            color: var(--card-text);
+        }
+
+        input[type="text"] {
+            flex: 2;
+            min-width: 200px;
+        }
+
+        input[type="date"], select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .add-btn {
+            padding: 10px 18px;
+            font-size: 15px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-btn:hover {
+            background-color: #0052a3;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: var(--card-bg);
+            color: var(--card-text);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        li.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .task-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .task-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            word-break: break-all;
+        }
+
+        .task-text {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .task-meta {
+            font-size: 12px;
+            color: var(--subtext-color);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Priority Badges */
+        .priority-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            color: white;
+        }
+
+        .priority-High { background-color: #ef4444; }
+        .priority-Medium { background-color: #f59e0b; }
+        .priority-Low { background-color: #10b981; }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .edit-btn {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .edit-btn:hover { background-color: #d97706; }
+
+        .delete-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover { background-color: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>MY TO DO LIST</h1>
+            <button class="theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        </div>
+
+        <!-- Inputs Section -->
+        <div class="input-form">
+            <input type="text" id="taskInput" placeholder="Enter your task">
+            
+            <div class="input-row">
+                <input type="date" id="dueDateInput">
+                <select id="priorityInput">
+                    <option value="Low">Low Priority</option>
+                    <option value="Medium" selected>Medium Priority</option>
+                    <option value="High">High Priority</option>
+                </select>
+                <button class="add-btn" onclick="addTask()">Add Task</button>
+            </div>
+        </div>
+
+        <!-- Task List Container -->
+        <ul id="taskList"></ul>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        function addTask() {
+            let taskInput = document.getElementById('taskInput');
+            let dueDateInput = document.getElementById('dueDateInput');
+            let priorityInput = document.getElementById('priorityInput');
+
+            let taskText = taskInput.value.trim();
+            let dueDate = dueDateInput.value;
+            let priority = priorityInput.value;
+
+            if (taskText === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            // Create Task <li> Element
+            let li = document.createElement('li');
+
+            // Task Left Container (Checkbox + Text & Meta)
+            let taskLeft = document.createElement('div');
+            taskLeft.className = 'task-left';
+
+            // Checkbox
+            let checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'task-checkbox';
+            checkbox.onchange = function() {
+                if (checkbox.checked) {
+                    li.classList.add('completed');
+                } else {
+                    li.classList.remove('completed');
+                }
+            };
+
+            // Task Details Container
+            let taskDetails = document.createElement('div');
+            taskDetails.className = 'task-details';
+
+            // Task Title
+            let spanText = document.createElement('span');
+            spanText.className = 'task-text';
+            spanText.textContent = taskText;
+
+            // Task Meta (Due Date + Priority Badge)
+            let taskMeta = document.createElement('div');
+            taskMeta.className = 'task-meta';
+
+            let dateSpan = document.createElement('span');
+            dateSpan.textContent = dueDate ? "📅 " + dueDate : "No due date";
+
+            let priorityBadge = document.createElement('span');
+            priorityBadge.className = 'priority-badge priority-' + priority;
+            priorityBadge.textContent = priority;
+
+            taskMeta.appendChild(dateSpan);
+            taskMeta.appendChild(priorityBadge);
+
+            taskDetails.appendChild(spanText);
+            taskDetails.appendChild(taskMeta);
+
+            taskLeft.appendChild(checkbox);
+            taskLeft.appendChild(taskDetails);
+
+            // Button Container
+            let btnGroup = document.createElement('div');
+            btnGroup.className = 'btn-group';
+
+            // Edit Button
+            let editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.className = 'edit-btn';
+            editBtn.onclick = function() {
+                let newText = prompt("Edit Task:", spanText.textContent);
+                if (newText !== null && newText.trim() !== "") {
+                    spanText.textContent = newText.trim();
+                }
+
+                let newDate = prompt("Edit Due Date (YYYY-MM-DD):", dueDateInput.value);
+                if (newDate !== null) {
+                    dateSpan.textContent = newDate.trim() !== "" ? "📅 " + newDate.trim() : "No due date";
+                }
+            };
+
+            // Delete Button
+            let deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = function() {
+                li.remove();
+            };
+
+            btnGroup.appendChild(editBtn);
+            btnGroup.appendChild(deleteBtn);
+
+            // Append all parts to <li>
+            li.appendChild(taskLeft);
+            li.appendChild(btnGroup);
+
+            // Append to List
+            document.getElementById('taskList').appendChild(li);
+
+            // Clear Inputs
+            taskInput.value = "";
+            dueDateInput.value = "";
+            priorityInput.value = "Medium";
+        }
+
+        // Dark/Light Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            let themeBtn = document.querySelector('.theme-btn');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                themeBtn.textContent = '☀️ Light Mode';
+            } else {
+                themeBtn.textContent = '🌙 Dark Mode';
+            }
+        }
+    </script>
+
+</body>
+</html>

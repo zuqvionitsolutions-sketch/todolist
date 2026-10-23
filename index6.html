@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY TO DO LIST</title>
+    
+    <style>
+        /* CSS Variables for Light/Dark Mode */
+        :root {
+            --bg-color: #eaf2ff;
+            --container-bg: #ffffff;
+            --text-color: #1a365d;
+            --input-border: #ccc;
+            --card-bg: #f8fafc;
+            --card-text: #333333;
+        }
+
+        /* Dark Mode Theme Variables */
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f8fafc;
+            --input-border: #475569;
+            --card-bg: #334155;
+            --card-text: #f1f5f9;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 30px;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 480px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        /* Dark Mode Toggle Button */
+        .theme-btn {
+            background-color: transparent;
+            border: 2px solid var(--text-color);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .theme-btn:hover {
+            opacity: 0.8;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 15px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            outline: none;
+            background-color: var(--container-bg);
+            color: var(--card-text);
+        }
+
+        .add-btn {
+            padding: 10px 18px;
+            font-size: 15px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .add-btn:hover {
+            background-color: #0052a3;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: var(--card-bg);
+            color: var(--card-text);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .task-text {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Edit Button Style */
+        .edit-btn {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .edit-btn:hover {
+            background-color: #d97706;
+        }
+
+        /* Delete Button Style */
+        .delete-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .delete-btn:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>MY TO DO LIST</h1>
+            <button class="theme-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        </div>
+
+        <!-- Task Input Box & Add Button -->
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Enter your task">
+            <button class="add-btn" onclick="addTask()">Add Task</button>
+        </div>
+
+        <!-- Task List Container -->
+        <ul id="taskList"></ul>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        // Function to Add Task
+        function addTask() {
+            let input = document.getElementById('taskInput');
+            let taskText = input.value;
+
+            // Check if input is empty
+            if (taskText.trim() === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            // Create new <li> element
+            let li = document.createElement('li');
+
+            // Span to store task text
+            let span = document.createElement('span');
+            span.textContent = taskText;
+            span.className = 'task-text';
+
+            // Container for buttons
+            let btnGroup = document.createElement('div');
+            btnGroup.className = 'btn-group';
+
+            // Create Edit Button
+            let editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit';
+            editBtn.className = 'edit-btn';
+
+            // Edit functionality
+            editBtn.onclick = function() {
+                let updatedTask = prompt("Edit your task:", span.textContent);
+                if (updatedTask !== null && updatedTask.trim() !== "") {
+                    span.textContent = updatedTask.trim();
+                }
+            };
+
+            // Create Delete Button
+            let deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'delete-btn';
+
+            // Delete functionality
+            deleteBtn.onclick = function() {
+                li.remove();
+            };
+
+            // Append buttons to group
+            btnGroup.appendChild(editBtn);
+            btnGroup.appendChild(deleteBtn);
+
+            // Append text and buttons to <li>
+            li.appendChild(span);
+            li.appendChild(btnGroup);
+
+            // Append <li> to taskList
+            document.getElementById('taskList').appendChild(li);
+
+            // Clear input field
+            input.value = "";
+        }
+
+        // Function to Toggle Dark/Light Mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            let themeBtn = document.querySelector('.theme-btn');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                themeBtn.textContent = '☀️ Light Mode';
+            } else {
+                themeBtn.textContent = '🌙 Dark Mode';
+            }
+        }
+    </script>
+
+</body>
+</html>

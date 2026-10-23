@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>MY TO DO LIST</title>
+</head>
+<body>
+
+    <h1>MY TO DO LIST</h1>
+
+    <!-- Task Input & Button -->
+    <input type="text" id="taskInput" placeholder="Enter your task">
+    <button onclick="addTask()">Add Task</button>
+
+    <!-- Task List -->
+    <ul id="taskList"></ul>
+
+    <!-- JavaScript Code -->
+    <script>
+        function addTask() {
+            let input = document.getElementById('taskInput');
+            let task = input.value;
+
+            // अगर इनपुट खाली है तो अलर्ट दिखाएं
+            if (task.trim() === "") {
+                alert("Please enter a task");
+                return;
+            }
+
+            // नया <li> एलिमेंट बनाएं और लिस्ट में जोड़ें
+            let li = document.createElement('li');
+            li.textContent = task;
+            document.getElementById('taskList').appendChild(li);
+
+            // इनपुट बॉक्स को फिर से खाली करें
+            input.value = "";
+        }
+    </script>
+
+</body>
+</html>
