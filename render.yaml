@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: jiswan-to-do-list
+    name: jishwan-to-do-list
     branch: render-deploy
     runtime: node
     plan: free
