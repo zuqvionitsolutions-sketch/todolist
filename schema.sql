@@ -1,4 +1,4 @@
-﻿CREATE DATABASE IF NOT EXISTS todo_app
+CREATE DATABASE IF NOT EXISTS todo_app
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
@@ -12,12 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
   dob_hash CHAR(128) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_users_name_key (name_key)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS tasks (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   user_id INT UNSIGNED NULL,
   task_text VARCHAR(500) NOT NULL,
+  description TEXT NOT NULL,
   category VARCHAR(100) NOT NULL DEFAULT 'General',
   priority ENUM('Low', 'Medium', 'High') NOT NULL DEFAULT 'Medium',
   due_date DATE NULL,
@@ -26,4 +27,4 @@ CREATE TABLE IF NOT EXISTS tasks (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_tasks_user_created (user_id, created_at),
   CONSTRAINT fk_tasks_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;

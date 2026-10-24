@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: murtajur-todo-list
+    branch: render-deploy
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DB_HOST
+        value: serverless-europe-west4.sysp0000.db2.skysql.com
+      - key: DB_PORT
+        value: "4013"
+      - key: DB_USER
+        value: dbpgf21303050
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: sky
+      - key: DB_SSL
+        value: "true"
+      - key: AUTH_SECRET
+        generateValue: true
