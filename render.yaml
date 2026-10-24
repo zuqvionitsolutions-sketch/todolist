@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: murtajur-todo-list
+    name: jiswan-to-do-list
     branch: render-deploy
     runtime: node
     plan: free
